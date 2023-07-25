@@ -1,0 +1,79 @@
+@charset "utf-8";
+/* CSS Document */
+body {
+  margin: 10px 10px 10px 0px;
+  padding: 200;
+  font-family: Arial, sans-serif;
+	  background-image: url('./photos/orangebk.jpg');
+	background-size: 1920px 1080px;
+}
+
+.container {
+  position: relative;
+}
+
+.loginbox {
+    position: absolute;
+    top: 170px;
+    left: 0px;
+    width: 423px;
+    padding: 50px;
+    font-family: Arial, sans-serif;
+}
+
+.border {
+  position: absolute;
+  top: -15px;
+  left: 0px;
+  width: 250px;
+  height: 670px;
+  padding: 100px;
+  background-color: white;
+	border-radius: 0px 100px 100px 00px;
+}
+
+h1 {
+  text-align: left;
+	font-size: 65px ;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 5px;
+}
+
+input {
+	margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 60%;
+	padding: 15px;
+}
+
+button {
+  padding: 10px 20px 10px 20px;
+  background-color: #FFA550;
+  color: #222222;
+  border: none;
+  border-radius: 20px 20px 20px 20px;
+  cursor: pointer;
+  width: 20%;
+}
+
+.error-text {
+  color: red;
+  text-align: center;
+}
+
+.shape {
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-top: 100px solid #007BFF;
+  margin: 20px auto;
+}
