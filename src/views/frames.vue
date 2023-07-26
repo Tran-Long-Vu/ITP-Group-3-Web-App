@@ -23,6 +23,9 @@
       </span>
       <img alt="image33057" src class="frames-image3" />
     </div>
+
+
+    
     <div class="frames-frame21">
       <img src alt="Rectangle151336" class="frames-rectangle151" />
       <span class="frames-text012"><span>Calendar</span></span>
@@ -399,7 +402,7 @@ export default {
     }
   },
   metaInfo: {
-    title: 'exported project',
+    title: ' project',
   },
 }
 </script>
