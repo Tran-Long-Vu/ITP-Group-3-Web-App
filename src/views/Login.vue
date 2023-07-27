@@ -12,13 +12,28 @@
                 <br>
                 <input class="username-box" type="text" placeholder="Username"><br>
                 <br><input type="text" placeholder="Password"><br>
-                <br><button type="submit" >Login</button>
+                <br><button type="submit" @click="login" >Login</button>
               </div>
           <img src="../assets/orangebg.jpg" alt="Img">
         </div>
       </form>
     </div>
   </template>
+
+<script>
+export default {
+  methods: {
+    login() {
+      // Perform login logic
+      // ...
+
+      // Redirect to Home
+      this.$router.push({ name: 'Home' })
+    }
+  }
+}
+</script>
+
 
 <style scoped>
 .login-container {
