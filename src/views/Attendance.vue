@@ -1,28 +1,24 @@
 <template>
-    <div class="frames-frame19">
-      <img alt="Rectangle151335" src class="frames-rectangle15" />
-      <span class="frames-text"><span>Dashboard</span></span>
-      <img alt="Rectangle191335" src class="frames-rectangle19" />
-      <img alt="Rectangle211335" src class="frames-rectangle21" />
-      <img alt="Rectangle201335" src class="frames-rectangle20" />
-      <img alt="Rectangle181335" src class="frames-rectangle18" />
-      <span class="frames-text002"><span>Calendar</span></span>
-      <img alt="Rectangle171335" src class="frames-rectangle17" />
-      <img alt="Rectangle161335" src class="frames-rectangle16" />
-      <span class="frames-text004"><span>Admin</span></span>
-      <img alt="logokse31335" src class="frames-logokse3" />
-      <img alt="image21335" src class="frames-image2" />
-      <span class="frames-text006"><span>Staff ID: 123</span></span>
-      <span class="frames-text008"><span>Weclome, Admin!</span></span>
-      <span class="frames-text010">
-        <span>
-          Department: HR
-          <span v-html="rawprji"></span>
-        </span>
-      </span>
-      <img alt="image33057" src class="frames-image3" />
+  <div id="app">
+    <nav class="navbar">
+      <div class="navbar-logo">
+        <router-link to="/Home">
+          <img src="../assets/logo.jpg" alt="Logo" width="120" height="50" style="margin-left: 50px;">
+        </router-link>  
+      </div>
+      <div class="navbar-links">
+        <router-link to="/Home" class="nav-link">Home</router-link>
+        <router-link to="/Calendar" class="nav-link">Calendar</router-link>
+        <router-link to="/Login" class="nav-link">LOG OUT</router-link>
+      </div>
+    </nav>
+    <!-- Contents of Attendance  -->
+    <div class="content">
+      <div class="square"> 
+      </div>
     </div>
-  </template>
+  </div>
+</template>
 <script>
 export default {
   name: 'attendance',

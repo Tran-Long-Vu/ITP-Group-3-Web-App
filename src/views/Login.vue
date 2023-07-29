@@ -41,13 +41,8 @@ export default {
   flex-direction: row;
   height: 100vh;
 }
-
-
-
 .login-image {
   width: 66.67%;
-  
-  
 }
 .login-image img {
   max-width: 100%;
@@ -55,16 +50,7 @@ export default {
   object-fit: cover;
 }
 
-.login-image img {
-  max-width: 100%;
-  max-height: 100%;
-}
-body {
-  margin: 10px 10px 10px 0px;
-  padding: 0;
-  font-family: Arial, sans-serif;
 
-}
 .login-box {
     position: absolute;
     top: 170px;
@@ -83,11 +69,12 @@ img{
 
 .border {
   position: absolute;
-  top: -15px;
+  top: 15px;
   left: 0px;
   width: 400px;
   height: 780px;
-  padding: 100px;
+  margin-top: 10px;
+  
   background-color: white;
 	border-radius: 0px 100px 100px 00px;
 }
@@ -96,7 +83,6 @@ h1 {
   text-align: left;
 	font-size: 65px ;
   margin-top: -15vh; /* Adjust this value as needed */
-
 }
 
 form {

@@ -7,6 +7,7 @@
       </div>
   </div>
   </div>
+  
 </template>
 
 <script>
@@ -23,9 +24,9 @@ export default {
       title: 'KSE',
     };
   },
-  
 };
 </script>
+
 <style scoped>
 .login-container {
   display: flex;
@@ -36,9 +37,7 @@ export default {
 
 
 .login-image {
-  width: 66.67%;
-  
-  
+  width: 66.67%;  
 }
 .login-image img {
   max-width: 100%;
