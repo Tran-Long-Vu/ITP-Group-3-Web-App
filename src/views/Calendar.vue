@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <nav class="navbar">
+   <div id="app">
+    <nav class="navbar ">
       <div class="navbar-logo">
         <router-link to="/Home">
           <img src="../assets/logo.jpg" alt="Logo" width="120" height="50" style="margin-left: 50px;">
@@ -12,113 +12,157 @@
         <router-link to="/Login" class="nav-link">Logout</router-link>
       </div>
     </nav>
-    <!-- Contents of Cal  -->
-    
+    <!-- Contents -->
     <div class="background-square">
       <br>
+    <div class="main-title">
       <h1>Calendar</h1>
-      <br>
-      <div class="calendar-nav">
-        <div class="calendar-nav">
-          <button id="prev-btn">Prev</button>
-          <h2 id="month">July</h2>
-          <button id="next-btn">Next</button>
-          <h2>Monthly view</h2>
-        </div>
-      </div>
-      <br>
-      <table class="calendar">
-        <thead>
-          <tr>
-            <th v-for="day in daysOfWeek">{{ day }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(week, index) in weeks" :key="index">
-            <td v-for="day in week" :class="{ today: isToday(day), selected: isSelected(day) }" @click="selectDate(day)">
-              {{ day.getDate() }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div> 
-      
-      <!-- Rest of your content here -->
-    
+    </div>    
+    <div class="btn-container">
+      <button class="prev-btn" @click="prevMonth">Prev  </button>
+      <h1 colspan="7">{{ monthNames[currentMonth] }} {{ currentYear }}</h1>
+      <button class="next-btn" @click="nextMonth">Next</button>
+    </div>
+    <br>
+    <table>
+      <thead>
+        <tr>
+          
+        </tr>
+        <tr>
+          <th>Sun</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(week, index) in weeks" :key="index">
+          <td v-for="(day, index) in week" :key="index">
+            <button class="day-btn" :id="'day-' + day + '-' + currentMonth" :class="{ 'red': !attendance[day] }" @click="handleDayClick(day)">{{ day }}</button>
+          </td>
+          
+        </tr>
+      </tbody>
+    </table>
+    </div>
   </div>
 </template>
+
 <script>
 export default {
-  name: 'Calendar',
   data() {
     return {
-      selectedDate: null,
-      daysOfWeek: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      currentYear: new Date().getFullYear(),
+      currentMonth: new Date().getMonth(),
+      monthNames: [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ],
       weeks: [],
-      months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      currentMonth: new Date().getMonth()
-    }
-  },
-  methods: {
-    isToday(date) {
-      const today = new Date()
-      return date.toDateString() === today.toDateString()
-    },
-    isSelected(date) {
-      return date.toDateString() === this.selectedDate?.toDateString()
-    },
-    selectDate(date) {
-      this.selectedDate = date
-      this.$emit('select-date', date)
-    },
-    prevMonth() {
-      this.currentMonth--;
-      if (this.currentMonth < 0) {
-        this.currentMonth = 11; // December is the 12th month
-      }
-    },
-    nextMonth() {
-      this.currentMonth++;
-      if (this.currentMonth > 11) {
-        this.currentMonth = 0; // January is the 1st month
-      }
-    }
+      selectedDay: null,
+      attendance: {},
+    };
   },
   mounted() {
-    const today = new Date()
-    const startOfMonth = new Date(today.getFullYear(), this.currentMonth, 1)
-    const endOfMonth = new Date(today.getFullYear(), this.currentMonth + 1, 0)
-    const daysInMonth = endOfMonth.getDate()
-    const dayOfWeek = startOfMonth.getDay()
-    let date = 1;
-    let week = [];
-    for (let i = 0; i < 7; i++) {
-      if (i < dayOfWeek) {
-        week.push(null);
-      } else {
-        week.push(new Date(today.getFullYear(), this.currentMonth, date));
-        date++;
+    this.updateTable();
+    this.setAttendance();
+  },
+  methods: {
+    updateTable() {
+      const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+      const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
+      const lastDayOfMonth = new Date(this.currentYear, this.currentMonth, daysInMonth).getDay();
+      
+      const weeks = [[]];
+      let currentWeek = 0;
+      let currentDay = 1;
+      for (let i = 0; i < firstDayOfMonth; i++) {
+        weeks[currentWeek].push(null);
       }
-    }
-    this.weeks.push(week);
-
-    while (date <= daysInMonth) {
-      week = [];
-      for (let i = 0; i < 7; i++) {
-        if (date > daysInMonth) {
-          week.push(null);
-        } else {
-          week.push(new Date(today.getFullYear(), this.currentMonth, date));
-          date++;
+      while (currentDay <= daysInMonth) {
+        if (weeks[currentWeek].length === 7) {
+          currentWeek++;
+          weeks.push([]);
         }
+        weeks[currentWeek].push(currentDay);
+        currentDay++;
       }
-      this.weeks.push(week);
-    }
-  }
-}
+      for (let i = lastDayOfMonth; i < 6; i++) {
+        weeks[currentWeek].push(null);
+      }
+      
+      this.weeks = weeks;
+    },
+    calculateAttendanceCount() {
+    const attendance = this.attendance;
+    this.weeks.forEach((week) => {
+      week.forEach((day) => {
+        if (day.day !== null) {
+          const yearMonthDay = `${this.currentYear}-${this.currentMonth + 1}-${day.day}`;
+          if (attendance[yearMonthDay]) {
+            day.isAttended = true;
+            
+          }
+        }
+      });
+    });
+  },
+    prevMonth() {
+      this.currentMonth = (this.currentMonth - 1 + 12) % 12;
+      if (this.currentMonth === 11) {
+        this.currentYear--;
+      }
+      this.updateTable();
+      this.calculateAttendanceCount();
+      
+    },
+    nextMonth() {
+      this.currentMonth = (this.currentMonth + 1) % 12;
+      if (this.currentMonth === 0) {
+        this.currentYear++;
+      }
+      this.updateTable();
+      this.calculateAttendanceCount();
+    },
+    handleDayClick(day) {
+      if (day.isCurrentMonth) {
+        this.selectedDay = day.day;
+      }
+    },
+  },
+};
 </script>
 
+
 <style scoped>
+.main-title{
+  text: center;
+}
+button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f2f2f2;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+button:active {
+  background-color: #ccc;
+}
 .calendar {
   border-collapse: collapse;
   width: 100%;
@@ -151,22 +195,73 @@ export default {
   padding: 10px;
   background-color: #f0f0f0;
 }
+.btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .prev-btn, .next-btn {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #FFA500;
+  color: FFFFFF;
   border: none;
   padding: 10px 20px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  margin: 4px 2px;
+  margin: 1px 20px;
   cursor: pointer;
+  width: 100px;
+  border-radius: 8px;
+
 }
 
 h2 {
   margin: 0;
   font-size: 20px;
 }
+/* Style the calendar table */
+table {
+      border-collapse: collapse;
+      margin: auto;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+    }
+    th {
+      background-color: #ccc;
+    }
+    td {
+      text-align: center;
+    }
+    .red {
+      background-color: #FF6347;
+      color: #fff;
+    }
+
+    .day-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.gray {
+  color: #ccc;
+}
+
+.red {
+  background-color: #FF6347;
+  color: white;
+}
+.day-tile.is-attended {
+  background-color: #FFA500;
+}
+
 </style>
