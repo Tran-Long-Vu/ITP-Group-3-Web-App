@@ -20,6 +20,7 @@
     </div>    
     
     <br>
+    <div class="container">
     <table>
       <thead>
         <tr>
@@ -42,6 +43,7 @@
       </tbody>
     </table>
     </div>
+    </div>
   </div>
 </template>
 
@@ -53,6 +55,20 @@ export default {
     return {
       days: Array.from({ length: 31 }, (_, i) => i + 1), // Array of days from 1 to 31
       staffNames: [
+      { id: 1, name: "John Doe" },
+        { id: 2, name: "Jane Smith" },
+        { id: 3, name: "Michael Johnson" },
+        { id: 4, name: "Emily Davis" },
+        { id: 5, name: "David Wilson" },
+        { id: 1, name: "John Doe" },
+        { id: 2, name: "Jane Smith" },
+        { id: 3, name: "Michael Johnson" },
+        { id: 4, name: "Emily Davis" },
+        { id: 5, name: "David Wilson" },{ id: 1, name: "John Doe" },
+        { id: 2, name: "Jane Smith" },
+        { id: 3, name: "Michael Johnson" },
+        { id: 4, name: "Emily Davis" },
+        { id: 5, name: "David Wilson" },
         { id: 1, name: "John Doe" },
         { id: 2, name: "Jane Smith" },
         { id: 3, name: "Michael Johnson" },
@@ -149,7 +165,7 @@ button:active {
   align-items: center;
   justify-content: center;
   height: 30px; /* Adjusted height to make the cell smaller */
-  width: 30px; /* Adjusted width to make the cell smaller */
+  width: 50px; /* Adjusted width to make the cell smaller */
   border-radius: 10px;
   z-index: 1;
 }
@@ -209,26 +225,36 @@ h2 {
   font-size: 20px;
 }
 /* Style the calendar table */
-table {
-      border-collapse: collapse;
-      margin: auto;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 10px;
-    }
-    th {
-      background-color: #ccc;
-    }
-    td {
-      text-align: center;
-    }
-    .red {
-      background-color: #FF8D79;
-      color: #fff;
-    }
 
+
+
+.container {
+  width: 1432px; /* Set the width of the container */
+  overflow-x: auto; /* Enable horizontal scrolling */
+  overflow-y: hidden; /* Hide vertical scrolling */
+  direction: rtl; /* Reverse the direction of content */
+}
+
+table {
+  width: max-content; /* Set the table to adjust its width based on content */
+  white-space: nowrap; /* Prevent line breaks within table cells */
+  direction: ltr; /* Restore the normal direction of content */
+}
+
+/* Additional styles for the table, cells, and headers (adjust as needed) */
+table {
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  border: 1px solid black;
+}
+
+th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
     .day-btn {
   width: 40px;
   height: 40px;
