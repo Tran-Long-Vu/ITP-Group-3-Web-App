@@ -1,39 +1,72 @@
 <template >
-    <div class="login-container">
-      <form>
-        <div class="container">
-          <div class="border"></div>	
-              <div class="login-box">
-                <br>
-                <br>
-                <br>
-                
-                <h1>Welcome!</h1>
-                <br>
-                <input class="username-box" type="text" placeholder="Username"><br>
-                <br><input type="text" placeholder="Password"><br>
-                <br><button type="submit" @click="login" >Login</button>
-              </div>
-          <img src="../assets/orangebg.jpg" alt="Img">
-        </div>
-      </form>
-    </div>
-  </template>
+  <div class="login-container">
+    <form @submit.prevent="login">
+      <div class="container">
+        <div class="border"></div>	
+            <div class="login-box">
+              <br>
+              <br>
+              <br>  
+              <h1>Welcome!</h1>
+              <br>
+              <input class="username-box" type="text" name="email" placeholder="Email" v-model="email"><br>
+              <br><input type="text" name="password" placeholder="Password" v-model="password" ><br>
+              <br><button type="submit">Login</button>
+            </div>
+        <img src="../assets/orangebg.jpg" alt="Img">
+      </div>
+    </form>
+  </div>
+</template>
+
 
 <script>
-export default {
-  methods: {
-    login() {
-      // Perform login logic
-      // ...
 
-      // Redirect to Home
-      this.$router.push({ name: 'Home' })
+ import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      email: '',
+      password: ''
+    };
+  },
+  methods: {
+    login: function() {
+      axios.post('http://localhost:3000/login', {
+        email: this.email,
+        password: this.password
+      }).then(res => {
+        const userData = res.data.userData;
+        if (userData) {
+          this.$store.commit('SET_USER', userData);
+          localStorage.user = JSON.stringify(userData); //  vuex into local.
+          
+          // Login successful, redirect to Home page
+          this.$router.push({ name: 'Home' });
+        } else {
+
+          // Login failed, display error message
+          this.$notify({
+            title: 'Error',
+            text: 'Invalid email or password',
+            type: 'error'
+            
+          });
+        }
+      }).catch(error => {
+        console.error(error);
+        this.$notify({
+          title: 'Error',
+          text: 'Internal server error',
+          type: 'error'
+        });
+      });
     }
   }
 }
-</script>
 
+</script>
 
 <style scoped>
 .login-container {

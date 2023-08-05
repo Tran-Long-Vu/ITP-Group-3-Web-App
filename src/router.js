@@ -4,7 +4,6 @@ import Meta from 'vue-meta'
 import Login from './views/Login.vue'
 import Home from './views/Home.vue'
 import Calendar from './views/Calendar.vue'
-import Attendance from './views/Attendance.vue'
 import './style.css'
 
 Vue.use(Router)
@@ -25,16 +24,12 @@ export default new Router({
       name: 'Home',
       path: '/Home',
       component: Home,
-    },    
+    },
     {
       name: 'Calendar',
       path: '/Calendar',
       component: Calendar,
     },
-    {
-      name: 'Attendance',
-      path: '/attendance',
-      component: Attendance,
-    },
+    
   ],
 })

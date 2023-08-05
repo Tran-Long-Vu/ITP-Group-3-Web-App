@@ -18,33 +18,26 @@
     <div class="main-title">
       <h1>Calendar</h1>
     </div>    
-    <div class="btn-container">
-      <button class="prev-btn" @click="prevMonth">Prev  </button>
-      <h1 colspan="7">{{ monthNames[currentMonth] }} {{ currentYear }}</h1>
-      <button class="next-btn" @click="nextMonth">Next</button>
-    </div>
+    
     <br>
     <table>
       <thead>
         <tr>
-          
-        </tr>
-        <tr>
-          <th>Sun</th>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
+          <th>Day</th>
+          <th v-for="staff in staffNames" :key="staff.id">{{ staff.name }}</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(week, index) in weeks" :key="index">
-          <td v-for="(day, index) in week" :key="index">
-            <button class="day-btn" :id="'day-' + day + '-' + currentMonth" :class="{ 'red': !attendance[day] }" @click="handleDayClick(day)">{{ day }}</button>
+        <tr v-for="day in days" :key="day">
+          <td>{{ day }}</td>
+          <td v-for="staff in staffNames" :key="staff.id" @mouseenter="handleMouseEnter(day, staff.id)" @mouseleave="handleMouseLeave(day, staff.id)">
+            <div :style="{ backgroundColor: getAttendanceColor(day, staff.id) }" class="attendance-cell">
+              {{ getAttendanceStatus(day, staff.id) }}
+              <div v-if="showAttendanceTime(day, staff.id)" class="attendance-time-box">
+                {{ getAttendanceTime(day, staff.id) }}
+              </div>
+            </div>
           </td>
-          
         </tr>
       </tbody>
     </table>
@@ -52,91 +45,62 @@
   </div>
 </template>
 
+
+
 <script>
 export default {
   data() {
     return {
-      currentYear: new Date().getFullYear(),
-      currentMonth: new Date().getMonth(),
-      monthNames: [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
+      days: Array.from({ length: 31 }, (_, i) => i + 1), // Array of days from 1 to 31
+      staffNames: [
+        { id: 1, name: "John Doe" },
+        { id: 2, name: "Jane Smith" },
+        { id: 3, name: "Michael Johnson" },
+        { id: 4, name: "Emily Davis" },
+        { id: 5, name: "David Wilson" }
       ],
-      weeks: [],
-      selectedDay: null,
-      attendance: {},
+      attendanceData: [
+        { day: 1, staffId: 1, status: "Yes", time: "09:00 AM" },
+        { day: 1, staffId: 2, status: "No", time: "" },
+        { day: 1, staffId: 3, status: "Yes", time: "10:30 AM" },
+        { day: 1, staffId: 4, status: "Yes", time: "11:15 AM" },
+        { day: 1, staffId: 5, status: "No", time: "" },
+        // Add more entries for the remaining days and staff members
+      ],
+      hoveredCell: { day: null, staffId: null }
     };
   },
-  mounted() {
-    this.updateTable();
-    this.setAttendance();
-  },
   methods: {
-    updateTable() {
-      const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-      const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
-      const lastDayOfMonth = new Date(this.currentYear, this.currentMonth, daysInMonth).getDay();
-      
-      const weeks = [[]];
-      let currentWeek = 0;
-      let currentDay = 1;
-      for (let i = 0; i < firstDayOfMonth; i++) {
-        weeks[currentWeek].push(null);
-      }
-      while (currentDay <= daysInMonth) {
-        if (weeks[currentWeek].length === 7) {
-          currentWeek++;
-          weeks.push([]);
-        }
-        weeks[currentWeek].push(currentDay);
-        currentDay++;
-      }
-      for (let i = lastDayOfMonth; i < 6; i++) {
-        weeks[currentWeek].push(null);
-      }
-      
-      this.weeks = weeks;
+    getAttendanceStatus(day, staffId) {
+      const entry = this.attendanceData.find(
+        data => data.day === day && data.staffId === staffId
+      );
+      return entry ? entry.status : "";
     },
-    calculateAttendanceCount() {
-    const attendance = this.attendance;
-    this.weeks.forEach((week) => {
-      week.forEach((day) => {
-        if (day.day !== null) {
-          const yearMonthDay = `${this.currentYear}-${this.currentMonth + 1}-${day.day}`;
-          if (attendance[yearMonthDay]) {
-            day.isAttended = true;
-            
-          }
-        }
-      });
-    });
-  },
-    prevMonth() {
-      this.currentMonth = (this.currentMonth - 1 + 12) % 12;
-      if (this.currentMonth === 11) {
-        this.currentYear--;
-      }
-      this.updateTable();
-      this.calculateAttendanceCount();
-      
+    getAttendanceColor(day, staffId) {
+      const status = this.getAttendanceStatus(day, staffId);
+      return status === "Yes" ? "green" : "#FF735A";
     },
-    nextMonth() {
-      this.currentMonth = (this.currentMonth + 1) % 12;
-      if (this.currentMonth === 0) {
-        this.currentYear++;
-      }
-      this.updateTable();
-      this.calculateAttendanceCount();
+    getAttendanceTime(day, staffId) {
+      const entry = this.attendanceData.find(
+        data => data.day === day && data.staffId === staffId
+      );
+      return entry ? entry.time : "";
     },
-    handleDayClick(day) {
-      if (day.isCurrentMonth) {
-        this.selectedDay = day.day;
-      }
+    handleMouseEnter(day, staffId) {
+      this.hoveredCell.day = day;
+      this.hoveredCell.staffId = staffId;
     },
-  },
+    handleMouseLeave(day, staffId) {
+      this.hoveredCell.day = null;
+      this.hoveredCell.staffId = null;
+    },
+    showAttendanceTime(day, staffId) {
+      return this.hoveredCell.day === day && this.hoveredCell.staffId === staffId;
+    }
+  }
 };
 </script>
-
 
 <style scoped>
 .main-title{
@@ -179,6 +143,29 @@ button:active {
   font-weight: bold;
 }
 
+.attendance-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px; /* Adjusted height to make the cell smaller */
+  width: 30px; /* Adjusted width to make the cell smaller */
+  border-radius: 10px;
+  z-index: 1;
+}
+
+.attendance-time-box {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 10px); /* Adjusted the left position to create a gap between the tile and the box */
+  transform: translateY(-50%);
+  background-color: white;
+  padding: 5px;
+  border: 2px solid black;
+  display: inline-block;
+  border-radius: 5px;
+  z-index: 2;
+}
 .calendar td.selected {
   background-color: #007bff;
   color: #fff;
@@ -238,7 +225,7 @@ table {
       text-align: center;
     }
     .red {
-      background-color: #FF6347;
+      background-color: #FF8D79;
       color: #fff;
     }
 
@@ -257,7 +244,7 @@ table {
 }
 
 .red {
-  background-color: #FF6347;
+  background-color: #FF8D79;
   color: white;
 }
 .day-tile.is-attended {

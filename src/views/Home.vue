@@ -16,7 +16,8 @@
     <!-- Contents of Home  -->    
     <div class="background-square">
       <br>
-      <h1>Welcome, User!</h1>
+      <h1 v-if="user"> Welcome, {{ user.name  }} </h1>     <!-- this gets killed upon refresh,.  -->    
+
       <br>
       <table class="table">
         <tbody>
@@ -25,20 +26,20 @@
               <img src="../assets/profile.jpg" alt="Logo" width="170" height="170">
             </td>
             <td :style="{ paddingBottom: '10px' }"><h3>Attendance today:</h3></td>
-            <td :style="{ paddingBottom: '10px' }"><h3>Present</h3></td>
+            <td :style="{ paddingBottom: '10px' }"><h3 v-if="user" >Present</h3></td>
           </tr>
           
           <tr>
             <td :style="{ paddingBottom: '10px' }"><h3>Account type:</h3></td>
-            <td :style="{ paddingBottom: '10px' }"><h3>Admin</h3></td>
+            <td :style="{ paddingBottom: '10px' }"><h3 v-if="user" >{{ user.admin === 1 ? "Administrator" : "User"}}</h3></td>
           </tr>
           <tr>
             <td :style="{ paddingBottom: '10px' }"><h3>Staff ID:</h3></td>
-            <td :style="{ paddingBottom: '10px' }"><h3>123</h3></td>
+            <td :style="{ paddingBottom: '10px' }"><h3 v-if="user" >{{ user.UID }}</h3></td>
           </tr>
           <tr>
             <td :style="{ paddingBottom: '10px' }"><h3>Department:</h3></td>
-            <td :style="{ paddingBottom: '10px' }"><h3>HR</h3></td>
+            <td :style="{ paddingBottom: '10px' }"><h3 v-if="user" >{{ user.department }}</h3></td>
           </tr>
           <tr>
 
@@ -48,6 +49,38 @@
     </div>      
   </div>
 </template>
+
+<script>
+export default {
+  
+  
+  data() {
+  return {
+    user: null  // JSON.parse(localStorage.user)
+  };
+},
+  
+  mounted() {
+  const storedUserData = localStorage.user;
+  if (storedUserData) {
+    this.user = JSON.parse(storedUserData);
+  } 
+  else {
+    // Set default user data if localStorage is empty
+    this.$router.push({ name: 'Login' });
+    }
+  }
+}
+  
+  // watch: {
+  //   storedUserData: function (newVal) {
+  //     // Store userData in localStorage when it changes
+  //     localStorage.setItem('userData', JSON.stringify(newVal))
+  //   }
+  // }
+
+
+</script>
 
 <style>
 .navbar {
