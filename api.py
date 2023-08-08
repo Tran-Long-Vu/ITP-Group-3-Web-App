@@ -23,6 +23,6 @@ def send_data_to_database(input_name, input_timestamp):
     #    print('Error sending data to nodejs.')
 if __name__ == '__main__':
     # test_function_here:
-    name = 'Bob Johnson'
+    name = 'Alice Lee'
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     send_data_to_database(name, timestamp)

@@ -87,7 +87,7 @@ export default {
   methods: {
     getAttendanceStatus(day, staffId) {
       const entry = this.attendanceData.find(
-        data => new Date(data.Timestamp).getDay() === day && new Date(data.Timestamp).getMonth() === this.currentMonth && data.UID === staffId
+        data => new Date(data.Timestamp).getDate() === day && new Date(data.Timestamp).getMonth() === this.currentMonth && data.UID === staffId
       );
       if (entry) {
         return entry.Status === 1 ? "Attended" : "Absent"
@@ -96,7 +96,7 @@ export default {
     },
     getAttendanceTime(day, staffId) {
       const entry = this.attendanceData.find(
-        data => new Date(data.Timestamp).getDay() === day && new Date(data.Timestamp).getMonth() === this.currentMonth && data.UID === staffId
+        data => new Date(data.Timestamp).getDate() === day && new Date(data.Timestamp).getMonth() === this.currentMonth && data.UID === staffId
       );
       return entry ? new Date(entry.Timestamp).toLocaleTimeString("en-US", { timeStyle: "medium" }) : "";
     },
