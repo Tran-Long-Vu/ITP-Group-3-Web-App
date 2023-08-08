@@ -112,7 +112,8 @@ export default {
   background-color: #D9D9D9;
   padding-left: 50px;
   padding-right: 50px;
-  height: 100vh; /* Set height to 100% of the viewport height */
+  min-height: 100vh; /* Set height to 100% of the viewport height */
+  height: fit-content;
   margin-left: 50px;
   margin-right: 50px;
 

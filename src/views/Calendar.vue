@@ -1,10 +1,10 @@
 <template>
-   <div id="app">
+  <div id="app">
     <nav class="navbar ">
       <div class="navbar-logo">
         <router-link to="/Home">
           <img src="../assets/logo.jpg" alt="Logo" width="120" height="50" style="margin-left: 50px;">
-        </router-link>  
+        </router-link>
       </div>
       <div class="navbar-links">
         <router-link to="/Home" class="nav-link">Home</router-link>
@@ -15,34 +15,50 @@
     <!-- Contents -->
     <div class="background-square">
       <br>
-    <div class="main-title">
-      <h1>Calendar</h1>
-    </div>    
-    
-    <br>
-    <div class="container">
-    <table>
-      <thead>
-        <tr>
-          <th>Day</th>
-          <th v-for="staff in staffNames" :key="staff.id">{{ staff.name }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="day in days" :key="day">
-          <td>{{ day }}</td>
-          <td v-for="staff in staffNames" :key="staff.id" @mouseenter="handleMouseEnter(day, staff.id)" @mouseleave="handleMouseLeave(day, staff.id)">
-            <div :style="{ backgroundColor: getAttendanceColor(day, staff.id) }" class="attendance-cell">
-              {{ getAttendanceStatus(day, staff.id) }}
-              <div v-if="showAttendanceTime(day, staff.id)" class="attendance-time-box">
-                {{ getAttendanceTime(day, staff.id) }}
-              </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
+      <div class="main-title">
+        <h1>Calendar</h1>
+      </div>
+      <br>
+      <div class="leg-container">
+        <span class="date-text">{{ currentDate.toLocaleDateString("en-US", { year: 'numeric', month: 'long' }) }}</span>
+        <div class="date-picker-container">
+          <button v-on:click="showDatePicker = !showDatePicker" class="cal-btn">Calendar</button>
+          <div>
+            <date-picker :value="currentDate" @input="handleCalendarInput" :inline="true" minimum-view="month"
+              maximum-view="month" v-if="showDatePicker"></date-picker>
+          </div>
+        </div>
+      </div>
+      <div class="pagination-container">
+        <paginate v-model="currentPage" :page-count="pages" :page-range="9" :click-handler="clickHandler"
+          :prev-text="'Previous'" :next-text="'Next'" :container-class="'pagination'">
+        </paginate>
+      </div>
+      <div class="container">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th v-for="day in slicedDay" :key="day">{{ day }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="staff in staffData">
+              <td>{{ staff.name }}</td>
+              <td v-for="day in slicedDay" :key="day + staff.UID" @mouseenter="handleMouseEnter(day)"
+                @mouseleave="handleMouseLeave(day)">
+                <div v-if="getAttendanceStatus(day, staff.UID) !== ''" class="attendance-cell"
+                  :class="getAttendanceStatus(day, staff.UID) === 'Attended' ? 'yes-status' : 'no-status'">
+                  {{ getAttendanceStatus(day, staff.UID) }}
+                  <span v-if="getAttendanceStatus(day, staff.UID) === 'Attended'" class="attendance-time">
+                    {{ getAttendanceTime(day, staff.UID) }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -50,90 +66,95 @@
 
 
 <script>
+import Paginate from 'vuejs-paginate'
+import Datepicker from 'vuejs-datepicker';
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      days: Array.from({ length: 31 }, (_, i) => i + 1), // Array of days from 1 to 31
-      staffNames: [
-      { id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Smith" },
-        { id: 3, name: "Michael Johnson" },
-        { id: 4, name: "Emily Davis" },
-        { id: 5, name: "David Wilson" },
-        { id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Smith" },
-        { id: 3, name: "Michael Johnson" },
-        { id: 4, name: "Emily Davis" },
-        { id: 5, name: "David Wilson" },{ id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Smith" },
-        { id: 3, name: "Michael Johnson" },
-        { id: 4, name: "Emily Davis" },
-        { id: 5, name: "David Wilson" },
-        { id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Smith" },
-        { id: 3, name: "Michael Johnson" },
-        { id: 4, name: "Emily Davis" },
-        { id: 5, name: "David Wilson" }
-      ],
-      attendanceData: [
-        { day: 1, staffId: 1, status: "Yes", time: "09:00 AM" },
-        { day: 1, staffId: 2, status: "No", time: "" },
-        { day: 1, staffId: 3, status: "Yes", time: "10:30 AM" },
-        { day: 1, staffId: 4, status: "Yes", time: "11:15 AM" },
-        { day: 1, staffId: 5, status: "No", time: "" },
-        // Add more entries for the remaining days and staff members
-      ],
-      hoveredCell: { day: null, staffId: null }
+      staffData: [],
+      attendanceData: [],
+      hoveredCell: null,
+      pageSize: 7,
+      currentPage: 1,
+      currentMonth: new Date().getMonth(),
+      currentYear: new Date().getFullYear(),
+      showDatePicker: false,
+      datePicker: null
     };
   },
   methods: {
     getAttendanceStatus(day, staffId) {
       const entry = this.attendanceData.find(
-        data => data.day === day && data.staffId === staffId
+        data => new Date(data.Timestamp).getDay() === day && new Date(data.Timestamp).getMonth() === this.currentMonth && data.UID === staffId
       );
-      return entry ? entry.status : "";
-    },
-    getAttendanceColor(day, staffId) {
-      const status = this.getAttendanceStatus(day, staffId);
-      return status === "Yes" ? "green" : "#FF735A";
+      if (entry) {
+        return entry.Status === 1 ? "Attended" : "Absent"
+      }
+      return ""
     },
     getAttendanceTime(day, staffId) {
       const entry = this.attendanceData.find(
-        data => data.day === day && data.staffId === staffId
+        data => new Date(data.Timestamp).getDay() === day && new Date(data.Timestamp).getMonth() === this.currentMonth && data.UID === staffId
       );
-      return entry ? entry.time : "";
+      return entry ? new Date(entry.Timestamp).toLocaleTimeString("en-US", { timeStyle: "medium" }) : "";
     },
-    handleMouseEnter(day, staffId) {
-      this.hoveredCell.day = day;
-      this.hoveredCell.staffId = staffId;
+    handleMouseEnter(day) {
+      this.hoveredCell = day;
     },
-    handleMouseLeave(day, staffId) {
-      this.hoveredCell.day = null;
-      this.hoveredCell.staffId = null;
+    handleMouseLeave(day) {
+      this.hoveredCell = null;
     },
-    showAttendanceTime(day, staffId) {
-      return this.hoveredCell.day === day && this.hoveredCell.staffId === staffId;
+    showAttendanceTime(day) {
+      return this.hoveredCell === day;
+    },
+    clickHandler: function (pageNum) {
+      this.currentPage = pageNum;
+    },
+    handleCalendarInput(input) {
+      this.currentPage = 1
+      this.currentMonth = input.getMonth()
+      this.currentYear = input.getFullYear()
     }
+  },
+  components: {
+    'paginate': Paginate,
+    'date-picker': Datepicker
+  },
+  computed: {
+    pages: function () {
+      return Math.ceil(this.dateCount / this.pageSize)
+    },
+    dateCount: function () {
+      return new Date(new Date().getFullYear(), this.currentMonth, 0).getDate()
+    },
+    slicedDay: function () {
+      const startIndex = this.pageSize * (this.currentPage - 1);
+      const endIndex = startIndex + this.pageSize;
+      return this.days.slice(startIndex, endIndex);
+    },
+    days: function () {
+      return Array.from({ length: this.dateCount }, (_, i) => i + 1)
+    },
+    currentDate: function () {
+      return new Date(this.currentYear, this.currentMonth)
+    }
+  },
+  mounted() {
+    axios.get('http://localhost:3000/calendars/users').then(res => {
+       this.staffData = res.data.data
+    })
+    axios.get('http://localhost:3000/calendars/attendance').then(res => {
+       this.attendanceData = res.data.data
+    })
   }
 };
 </script>
 
 <style scoped>
-.main-title{
-  text: center;
-}
-button {
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  font-size: 16px;
-  font-weight: bold;
+.main-title {
   text-align: center;
-  background-color: #f2f2f2;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
 }
 
 button:hover {
@@ -143,6 +164,7 @@ button:hover {
 button:active {
   background-color: #ccc;
 }
+
 .calendar {
   border-collapse: collapse;
   width: 100%;
@@ -160,37 +182,27 @@ button:active {
 }
 
 .attendance-cell {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 30px; /* Adjusted height to make the cell smaller */
-  width: 50px; /* Adjusted width to make the cell smaller */
-  border-radius: 10px;
-  z-index: 1;
+  min-width: 60px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 5px;
+  text-align: center;
+  margin: auto;
 }
 
-.attendance-time-box {
-  position: absolute;
-  top: 50%;
-  left: calc(100% + 10px); /* Adjusted the left position to create a gap between the tile and the box */
-  transform: translateY(-50%);
-  background-color: white;
-  padding: 5px;
-  border: 2px solid black;
-  display: inline-block;
-  border-radius: 5px;
-  z-index: 2;
+.yes-status {
+  background-color: rgb(49, 204, 49);
 }
-.calendar td.selected {
-  background-color: #007bff;
-  color: #fff;
+
+.no-status {
+  background-color: rgb(196, 0, 0);
 }
 
 .calendar td:hover {
   cursor: pointer;
   background-color: #f0f0f0;
 }
+
 .calendar-nav {
   display: flex;
   justify-content: space-between;
@@ -198,13 +210,15 @@ button:active {
   padding: 10px;
   background-color: #f0f0f0;
 }
+
 .btn-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.prev-btn, .next-btn {
+.prev-btn,
+.next-btn {
   background-color: #FFA500;
   color: FFFFFF;
   border: none;
@@ -224,21 +238,45 @@ h2 {
   margin: 0;
   font-size: 20px;
 }
+
 /* Style the calendar table */
 
 
 
 .container {
-  width: 1432px; /* Set the width of the container */
-  overflow-x: auto; /* Enable horizontal scrolling */
-  overflow-y: hidden; /* Hide vertical scrolling */
-  direction: rtl; /* Reverse the direction of content */
+  width: 100%;
+  height: 80vh;
+  /* Set the width of the container */
+  overflow-x: auto;
+  /* Enable horizontal scrolling */
+  overflow-y: auto;
+  /* Hide vertical scrolling */
+  direction: rtl;
+  /* Reverse the direction of content */
+}
+
+.container::-webkit-scrollbar-track {
+  background-color: #F5F5F5;
+}
+
+.container::-webkit-scrollbar {
+  width: 5px;
+  background-color: #F5F5F5;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #000000;
+  border: 2px solid #555555;
 }
 
 table {
-  width: max-content; /* Set the table to adjust its width based on content */
-  white-space: nowrap; /* Prevent line breaks within table cells */
-  direction: ltr; /* Restore the normal direction of content */
+  width: fit-content;
+  margin: auto;
+  /* Set the table to adjust its width based on content */
+  white-space: nowrap;
+  /* Prevent line breaks within table cells */
+  direction: ltr;
+  /* Restore the normal direction of content */
 }
 
 /* Additional styles for the table, cells, and headers (adjust as needed) */
@@ -246,8 +284,11 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
-  padding: 8px;
+th,
+td {
+  min-width: 60px;
+  height: 30px;
+  padding: 6px;
   border: 1px solid black;
 }
 
@@ -255,7 +296,8 @@ th {
   background-color: #f2f2f2;
   text-align: left;
 }
-    .day-btn {
+
+.day-btn {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -273,8 +315,103 @@ th {
   background-color: #FF8D79;
   color: white;
 }
+
 .day-tile.is-attended {
   background-color: #FFA500;
 }
 
+.pagination>li>a,
+.pagination>li>span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: #337ab7;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+</style>
+
+<!-- Pagination style -->
+<style>
+.pagination>li {
+  display: inline;
+}
+
+.pagination {
+  padding-left: 0;
+  margin: 20px;
+  border-radius: 4px;
+}
+
+.pagination>.active>a,
+.pagination>.active>span,
+.pagination>.active>a:hover,
+.pagination>.active>span:hover,
+.pagination>.active>a:focus,
+.pagination>.active>span:focus {
+  z-index: 2;
+  color: #fff;
+  cursor: default;
+  background-color: #337ab7;
+  border-color: #337ab7;
+}
+
+.pagination>.disabled>span,
+.pagination>.disabled>span:hover,
+.pagination>.disabled>span:focus,
+.pagination>.disabled>a,
+.pagination>.disabled>a:hover,
+.pagination>.disabled>a:focus {
+  color: #949494;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+
+.pagination a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color .3s;
+  border: 1px solid #8d8d8d;
+  margin: 5px 3px;
+}
+
+.pagination-container {
+  width: fit-content;
+  margin: auto;
+}
+
+.date-text {
+  text-align: center;
+  font-size: 25px;
+}
+
+.leg-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.date-picker-container {
+  width: fit-content;
+  display: flex;
+}
+
+.cal-btn {
+  margin-left: 100px;
+  width: fit-content;
+  height: fit-content;
+  padding: 10px;
+  margin: 0px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f2f2f2;
+  cursor: pointer;
+}
 </style>
