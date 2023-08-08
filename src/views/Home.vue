@@ -10,7 +10,8 @@
       <div class="navbar-links">
         <router-link to="/Home" class="nav-link">Home</router-link>
         <router-link to="/Calendar" class="nav-link">Calendar</router-link>
-        <router-link to="/Login" class="nav-link">Logout</router-link>
+        <button @click="logout">Logout</button>
+
       </div>
     </nav>
     <!-- Contents of Home  -->    
@@ -23,7 +24,7 @@
         <tbody>
           <tr>
             <td rowspan="4" :style="{ verticalAlign: 'middle', paddingRight: '20px' }">
-              <img src="../assets/profile.jpg" alt="Logo" width="170" height="170">
+              <img src="../assets/profile.jpg" alt="Logo" width="170" height="170" >
             </td>
             <td :style="{ paddingBottom: '10px' }"><h3>Attendance today:</h3></td>
             <td :style="{ paddingBottom: '10px' }"><h3 v-if="user" >Present</h3></td>
@@ -69,15 +70,17 @@ export default {
     // Set default user data if localStorage is empty
     this.$router.push({ name: 'Login' });
     }
+  },
+  methods: {
+    logout() {
+      // Clear the local storage
+      localStorage.clear();
+      this.$router.push({ name: 'Login' });
+    }
   }
 }
   
-  // watch: {
-  //   storedUserData: function (newVal) {
-  //     // Store userData in localStorage when it changes
-  //     localStorage.setItem('userData', JSON.stringify(newVal))
-  //   }
-  // }
+  
 
 
 </script>
@@ -118,6 +121,8 @@ export default {
   margin-right: 50px;
 
 }
+
+
 .table {
   border-collapse: separate;
   border-spacing: 0 0px;

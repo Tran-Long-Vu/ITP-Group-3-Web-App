@@ -10,7 +10,7 @@
               <h1>Welcome!</h1>
               <br>
               <input class="username-box" type="text" name="email" placeholder="Email" v-model="email"><br>
-              <br><input type="text" name="password" placeholder="Password" v-model="password" ><br>
+              <br><input type="password" name="password" placeholder="Password" v-model="password" ><br>
               <br><button type="submit">Login</button>
             </div>
         <img src="../assets/orangebg.jpg" alt="Img">

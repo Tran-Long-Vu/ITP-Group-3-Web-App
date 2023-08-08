@@ -9,7 +9,7 @@
       <div class="navbar-links">
         <router-link to="/Home" class="nav-link">Home</router-link>
         <router-link to="/Calendar" class="nav-link">Calendar</router-link>
-        <router-link to="/Login" class="nav-link">Logout</router-link>
+        <button @click="logout">Logout</button>
       </div>
     </nav>
     <!-- Contents -->
@@ -116,6 +116,11 @@ export default {
       this.currentPage = 1
       this.currentMonth = input.getMonth()
       this.currentYear = input.getFullYear()
+    },
+    logout() {
+      // Clear the local storage
+      localStorage.clear();
+      this.$router.push({ name: 'Login' });
     }
   },
   components: {
@@ -411,7 +416,8 @@ th {
   font-size: 16px;
   font-weight: bold;
   text-align: center;
-  background-color: #f2f2f2;
+  background-color: #FFA500;
   cursor: pointer;
+  border-radius: 10px
 }
 </style>
