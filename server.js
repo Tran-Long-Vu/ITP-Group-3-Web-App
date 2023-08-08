@@ -48,6 +48,75 @@ app.post('/login', (req, res) => {
   });
 });
 
+// Model route 
+app.post('/model', (req, res) => {
+  const { name, timestamp } = req.body;
+  if(req.body){
+    console.log(req.body);
+    console.log('Received data:');
+    console.log('Name:', name);
+    console.log('Timestamp:', timestamp);
+  }
+  
+
+  // Perform any necessary database operations or data processing here
+  // Query the database to check if the email and password match
+  db.get(
+    'SELECT UID FROM USERS WHERE name = ?',
+    [name],
+    (err, row) => {
+      if (err) {
+        console.error(err.message);
+      } else if (row) {
+        const uid = row.UID;
+  
+        // Check if the attendance record already exists for the same UID and timestamp
+        db.get(
+          'SELECT * FROM ATTENDANCE WHERE UID = ? AND Timestamp = ?',
+          [uid, timestamp],
+          (err, row) => {
+            if (err) {
+              console.error(err.message);
+            } else if (row) {
+              // Attendance record already exists, update the Status to 1
+              db.run(
+                'UPDATE ATTENDANCE SET Status = ? WHERE UID = ? AND Timestamp = ?',
+                [1, uid, timestamp],
+                function (err) {
+                  if (err) {
+                    console.error(err.message);
+                  } else {
+                    console.log('Attendance updated successfully!');
+                  }
+                }
+              );
+            } else {
+              // Attendance record doesn't exist, insert a new record
+              db.run(
+                'INSERT INTO ATTENDANCE (UID, Timestamp, Status) VALUES (?, ?, ?)',
+                [uid, timestamp, 1],
+                function (err) {
+                  if (err) {
+                    console.error(err.message);
+                  } else {
+                    console.log('Attendance recorded successfully!');
+                  }
+                }
+              );
+            }
+          }
+        );
+      } else {
+        console.log('User not found.');
+      }
+    }
+  );
+  // Send a response back to the Python code
+  res.status(200).send('Data received successfully from Node!');
+});
+
+
+// Calendar route
 app.get('/calendars/:data', (req, res) => {
   if (req.params.data == "users") {
     db.all('SELECT UID, name, attendance_count, absence_count FROM USERS', (err, data) => {
